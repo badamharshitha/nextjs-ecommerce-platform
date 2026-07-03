@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480" viewBox="0 0 640 480" role="img" aria-labelledby="placeholderTitle placeholderDesc">
+  <title id="placeholderTitle">Product image placeholder</title>
+  <desc id="placeholderDesc">A gray box with centered text indicating an image placeholder.</desc>
+  <rect width="640" height="480" fill="#e2e8f0" />
+  <text x="50%" y="50%" fill="#94a3b8" font-family="Inter, system-ui, sans-serif" font-size="32" text-anchor="middle" dominant-baseline="middle">
+    Image placeholder
+  </text>
+</svg>
