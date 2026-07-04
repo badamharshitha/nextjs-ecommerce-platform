@@ -1,8 +1,8 @@
 import Image from 'next/image'
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import Header from '@/components/header'
 import Footer from '@/components/footer'
+import ProductDetailActions from '@/components/product-detail-actions'
 import { products } from '@/lib/data'
 
 export const dynamicParams = false
@@ -48,14 +48,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
                 <p className="mt-3 text-lg font-semibold text-slate-900">Free shipping on orders over $75</p>
               </div>
             </div>
-            <div className="flex flex-wrap gap-3">
-              <button className="rounded-full bg-brand-700 px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">
-                Add to cart
-              </button>
-              <button className="rounded-full border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">
-                Add to wishlist
-              </button>
-            </div>
+            <ProductDetailActions productId={product.id} available={product.available} />
           </div>
         </div>
 

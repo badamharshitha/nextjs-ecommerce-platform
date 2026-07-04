@@ -28,7 +28,7 @@ export const products: Product[] = [
     price: 54,
     rating: 4.8,
     available: true,
-    image: '/images/hoodie.jpg',
+    image: "/images/hoodie.jfif",
     tags: ['hoodie', 'cozy', 'winter'],
     reviews: [
       {
@@ -55,7 +55,7 @@ export const products: Product[] = [
     price: 72,
     rating: 4.6,
     available: true,
-    image: '/images/backpack.jpg',
+    image: '/images/backpack.png',
     tags: ['backpack', 'travel', 'daily'],
     reviews: [
       {
@@ -75,7 +75,7 @@ export const products: Product[] = [
     price: 199,
     rating: 4.9,
     available: true,
-    image: '/images/headphones.jpg',
+    image: '/images/headphones.jfif',
     tags: ['audio', 'wireless', 'tech'],
     reviews: [
       {

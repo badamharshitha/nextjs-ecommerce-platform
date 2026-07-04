@@ -1,42 +1,18 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Header from '@/components/header'
 import Footer from '@/components/footer'
 import { products } from '@/lib/data'
-
-type CartItem = { id: string; quantity: number }
-
-const CART_KEY = 'storefront-cart'
+import { useCartWishlist } from '@/components/providers'
+import { useRouter } from 'next/navigation'
 
 export default function CartPage() {
-  const [cart, setCart] = useState<CartItem[]>([])
+  const { cartItems, removeFromCart, incrementQuantity, decrementQuantity, cartTotal } = useCartWishlist()
+  const router = useRouter()
 
-  useEffect(() => {
-    const stored = window.localStorage.getItem(CART_KEY)
-    if (stored) {
-      setCart(JSON.parse(stored))
-    }
-  }, [])
-
-  useEffect(() => {
-    window.localStorage.setItem(CART_KEY, JSON.stringify(cart))
-  }, [cart])
-
-  const updateQuantity = (id: string, quantity: number) => {
-    setCart((current) => current.map((item) => (item.id === id ? { ...item, quantity } : item)))
-  }
-
-  const removeItem = (id: string) => {
-    setCart((current) => current.filter((item) => item.id !== id))
-  }
-
-  const items = cart.map((item) => ({
-    ...products.find((product) => product.id === item.id)!,
-    quantity: item.quantity,
-  }))
-
-  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const items = cartItems
+    .map((item) => ({ ...products.find((product) => product.id === item.id)!, quantity: item.quantity }))
+    .filter((item) => item)
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -59,7 +35,7 @@ export default function CartPage() {
                       <p className="mt-1 text-sm text-slate-500">${item.price} each</p>
                     </div>
                     <button
-                      onClick={() => removeItem(item.id)}
+                      onClick={() => removeFromCart(item.id)}
                       className="text-sm font-medium text-red-600 hover:text-red-800"
                     >
                       Remove
@@ -69,14 +45,30 @@ export default function CartPage() {
                     <label htmlFor={`qty-${item.id}`} className="text-sm font-medium text-slate-700">
                       Quantity
                     </label>
+                    <button
+                      type="button"
+                      onClick={() => decrementQuantity(item.id)}
+                      className="rounded-full border border-slate-300 px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-100"
+                      aria-label={`Decrease quantity for ${item.name}`}
+                    >
+                      −
+                    </button>
                     <input
                       id={`qty-${item.id}`}
                       type="number"
                       min="1"
                       value={item.quantity}
-                      onChange={(event) => updateQuantity(item.id, Number(event.target.value))}
-                      className="w-24 rounded-full border border-slate-300 px-4 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
+                      readOnly
+                      className="w-20 rounded-full border border-slate-300 px-4 py-2 text-sm text-slate-900 focus:outline-none"
                     />
+                    <button
+                      type="button"
+                      onClick={() => incrementQuantity(item.id)}
+                      className="rounded-full border border-slate-300 px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-100"
+                      aria-label={`Increase quantity for ${item.name}`}
+                    >
+                      +
+                    </button>
                   </div>
                 </div>
               ))}
@@ -86,7 +78,7 @@ export default function CartPage() {
               <div className="mt-6 space-y-4">
                 <div className="flex items-center justify-between text-sm text-slate-600">
                   <span>Subtotal</span>
-                  <span>${subtotal.toFixed(2)}</span>
+                  <span>${cartTotal.toFixed(2)}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm text-slate-600">
                   <span>Shipping</span>
@@ -94,10 +86,14 @@ export default function CartPage() {
                 </div>
                 <div className="flex items-center justify-between text-base font-semibold text-slate-900">
                   <span>Total</span>
-                  <span>${(subtotal + 10).toFixed(2)}</span>
+                  <span>${(cartTotal + 10).toFixed(2)}</span>
                 </div>
               </div>
-              <button className="mt-8 w-full rounded-full bg-brand-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-brand-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">
+              <button
+                onClick={() => router.push('/checkout')}
+                className="mt-8 w-full rounded-full bg-brand-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-brand-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
+                aria-label="Proceed to checkout"
+              >
                 Proceed to checkout
               </button>
             </aside>

@@ -1,24 +1,44 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Header from '@/components/header'
 import Footer from '@/components/footer'
+import { useCartWishlist } from '@/components/providers'
+import { products } from '@/lib/data'
 
 const STEPS = ['Shipping', 'Billing', 'Payment'] as const
 
 type Step = (typeof STEPS)[number]
 
+type FormState = {
+  shipping: string
+  city: string
+  postal: string
+  billingName: string
+  cardNumber: string
+}
+
 export default function CheckoutPage() {
+  const router = useRouter()
+  const { cartItems, cartTotal, clearCart } = useCartWishlist()
   const [step, setStep] = useState<Step>('Shipping')
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<FormState>({
     shipping: '',
     city: '',
     postal: '',
     billingName: '',
     cardNumber: '',
   })
+  const [submitted, setSubmitted] = useState(false)
+
+  const isEmptyCart = cartItems.length === 0
+
+  const orderSubtotal = useMemo(() => cartTotal, [cartTotal])
+  const orderTotal = orderSubtotal + 10
 
   const next = () => {
+    setSubmitted(false)
     const current = STEPS.indexOf(step)
     if (current < STEPS.length - 1) {
       setStep(STEPS[current + 1])
@@ -36,6 +56,21 @@ export default function CheckoutPage() {
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
+  const placeOrder = async () => {
+    setSubmitted(true)
+    // simple validation
+    if (!form.shipping || !form.city || !form.postal || !form.billingName || !form.cardNumber) {
+      return
+    }
+
+    // simulate order request
+    await new Promise((res) => setTimeout(res, 700))
+
+    // clear cart only after order success
+    clearCart()
+    router.push('/checkout/success')
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Header />
@@ -49,7 +84,8 @@ export default function CheckoutPage() {
           ))}
         </div>
 
-        <section className="mt-8 rounded-3xl bg-white p-8 shadow-sm">
+        <div className="mt-8 grid gap-8 lg:grid-cols-[1.4fr_0.6fr]">
+          <section className="rounded-3xl bg-white p-8 shadow-sm">
           {step === 'Shipping' && (
             <div className="space-y-6">
               <div>
@@ -97,11 +133,55 @@ export default function CheckoutPage() {
             <button onClick={prev} disabled={step === 'Shipping'} className="rounded-full border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50">
               Back
             </button>
-            <button onClick={next} className="rounded-full bg-brand-700 px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-800">
-              {step === 'Payment' ? 'Complete order' : 'Continue'}
+            <button
+              onClick={step === 'Payment' ? placeOrder : next}
+              className="rounded-full bg-brand-700 px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-800"
+              aria-label={step === 'Payment' ? 'Place order' : 'Continue checkout'}
+            >
+              {step === 'Payment' ? 'Place order' : 'Continue'}
             </button>
           </div>
-        </section>
+          </section>
+
+          <aside className="rounded-3xl bg-white p-6 shadow-sm">
+            <h2 className="text-xl font-semibold text-slate-900">Order summary</h2>
+            <div className="mt-6 space-y-4">
+              {cartItems.length === 0 ? (
+                <p className="text-sm text-slate-600">Your cart is empty.</p>
+              ) : (
+                <div className="space-y-4">
+                  {cartItems.map((item) => {
+                    const p = products.find((pr) => pr.id === item.id)!
+                    return (
+                      <div key={item.id} className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-slate-900">{p.name}</p>
+                          <p className="text-xs text-slate-600">Qty {item.quantity}</p>
+                        </div>
+                        <div className="text-sm text-slate-700">${(p.price * item.quantity).toFixed(2)}</div>
+                      </div>
+                    )
+                  })}
+
+                  <div className="mt-4 border-t pt-4">
+                    <div className="flex items-center justify-between text-sm text-slate-600">
+                      <span>Subtotal</span>
+                      <span>${orderSubtotal.toFixed(2)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm text-slate-600">
+                      <span>Shipping</span>
+                      <span>$10.00</span>
+                    </div>
+                    <div className="flex items-center justify-between text-base font-semibold text-slate-900 mt-2">
+                      <span>Total</span>
+                      <span>${orderTotal.toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </aside>
+        </div>
       </main>
       <Footer />
     </div>
