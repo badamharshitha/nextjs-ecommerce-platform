@@ -95,7 +95,7 @@ export const products: Product[] = [
     price: 89,
     rating: 4.5,
     available: false,
-    image: '/images/sneakers.jpg',
+    image: '/images/sneakers.jfif',
     tags: ['sneakers', 'comfort', 'running'],
     reviews: [
       {
